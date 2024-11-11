@@ -1,5 +1,5 @@
 #Classe GKSimulator(QuantumCircuit)
 #   method Pauli -> mesure
 
-class GKsimulator(QuantumCircuit):
+class GKSimulator:
     pass
