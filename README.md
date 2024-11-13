@@ -1,6 +1,10 @@
 # Devoir 4
 
 
+```bash
+Python 3.11.9
+```
+
 ## Date limite : 2 décembre 2024 à 13h30
 
 Pour ce devoir, créez une branche sur le repositoire. Nommez cette branche avec votre nom. Il s'agit d'un travail individuel, dont la note maximale est de 100 points.
