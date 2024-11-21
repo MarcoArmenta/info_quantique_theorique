@@ -1,2 +1,4 @@
 # Ignore the virtual environment generated from `requirements.txt`
 .venv/
+# Ignore tests file
+test.py
