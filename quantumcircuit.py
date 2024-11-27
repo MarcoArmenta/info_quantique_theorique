@@ -1,4 +1,4 @@
 #Classe Quantum Circuit(H,S, CNOT, PAULIS)
 
-class QuantumCircuit:
+class QuantumCircuit(__self__, circuit):
     pass
