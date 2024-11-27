@@ -2,3 +2,5 @@
 .venv/
 # Ignore tests file
 test.py
+# Ignore __pycache__
+__pycache__/
