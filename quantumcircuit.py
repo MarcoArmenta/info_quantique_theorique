@@ -1,5 +1,9 @@
-import json
-import numpy as np
+"""
+Fichier contenant la classe qui permet de formaliser les observables fournient pour chacun des
+circuits sous la forme de `PauliObservable`.
+"""
+
+
 
 from observables import PauliObservable
 
@@ -25,23 +29,3 @@ class QuantumCircuit:
         self.l = l
         for circ in self.l:
             circ[1] = PauliObservable(circ[1])
-            # self._translate_eig_vals_to_bool(circ[2])
-
-    # def _translate_eig_vals_to_bool(self, eig_vals: list):
-    #     """
-    #     Traduire les valeurs propres en valeurs booléennes pour une représentation plus légères des
-    #     informations.
-    #     """
-    #     zeros = np.zeros(len(eig_vals), dtype=bool)
-    #     for eig_val_idx, eig_val in enumerate(eig_vals):
-    #         if eig_val == "-":
-    #             zeros[eig_val_idx] = True
-    #     circ[2] = zeros
-
-
-if __name__ == "__main__":
-    with open('dummy_circuits.json', 'r') as file:
-        l = json.load(file)
-    print(l)
-    q = QuantumCircuit(l)
-    print(q.l)

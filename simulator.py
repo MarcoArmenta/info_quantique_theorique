@@ -1,5 +1,13 @@
-import numpy as np
+"""
+Fichier contenant la classe qui permet de simuler les circuits quantiques fournient et de mesurer
+les probabilités de mesurer certaines valeurs propres.
+"""
+
+
+
 from multiprocessing.pool import Pool
+
+import numpy as np
 
 from observables import PauliObservable
 from quantumcircuit import QuantumCircuit
@@ -8,8 +16,11 @@ from quantumcircuit import QuantumCircuit
 
 class GKSimulator:
     """
-    Classe qui dispose d'une méthode pour mesurer une observable de Pauli donnée.
+    Classe qui dispose d'une méthode pour mesurer une observable de Pauli donnée à partir d'une
+    représentation de l'évolution des stabilizateurs par tableau.
     """
+
+    max_cores = 8 # Le nombre maximal de coeurs à utiliser pour la parallélization de la simulation
     def __init__(self):
         """
         Initialiser la classe `GKSimulator`.
@@ -40,8 +51,18 @@ class GKSimulator:
         for block in blocks:
             self._update_tableau(block)
         # Extrai les mesures
-        result = self._measure_from_updated_tableau(observable, sing_values)
-        return result
+        if self.num_qubits > 0:
+            result = self._measure_from_updated_tableau(observable, sing_values)
+        else:
+            result = {sing_value: None for sing_value in sing_values}
+        return self.tableau, result
+
+    def _update_tableau(self, block: dict):
+        """
+        Évoluer le tableau après l'application d'un bloc de portes `block` dans le circuit.
+        """
+        for gate, qubit_ids in block.items():
+            self.apply_gate_fns_dict[gate](qubit_ids=qubit_ids)
 
     def _apply_x_gate(self, qubit_ids: list):
         """
@@ -99,42 +120,40 @@ class GKSimulator:
         self.tableau[:,-1] = self.tableau[:,-1] ^ np.logical_xor.reduce((self.tableau[:,x_cols] & self.tableau[:,z_cols]), axis=1)
         self.tableau[:, z_cols] ^= self.tableau[:, x_cols]
 
-    def _update_tableau(self, block: dict):
-        """
-        Évoluer le tableau après l'application d'un bloc de portes `block` dans le circuit.
-        """
-        for gate, qubit_ids in block.items():
-            self.apply_gate_fns_dict[gate](qubit_ids=qubit_ids)
-
     def _measure_from_updated_tableau(self, observable: PauliObservable, sing_values: list):
         """
         Déterminer la mesure des valeurs propres "+" et "-" à la fin du circuit selon
         l'observable donnée.
         """
-        measure = {sing_value: None for sing_value in sing_values}
+        measure = {}
         obs = observable.obs_bool
         x_and_z_swapped_obs = np.roll(obs, self.num_qubits)
         stabs = self.tableau[self.num_qubits:, :-1]
         symplectic_products = np.logical_xor.reduce(stabs & x_and_z_swapped_obs, axis=1)
         if not np.any(symplectic_products):
             r_values = self.tableau[:,-1]
-            tableau_T_inv = self._find_inverse_of_bool_matrix()
-            coeffs = np.logical_xor.reduce(tableau_T_inv & obs, axis=1)
+            # tableau_T_inv = self._find_inverse_of_bool_matrix()
+            # coeffs = np.logical_xor.reduce(tableau_T_inv & obs, axis=1)
             # print(coeffs)
-            # coeffs = np.linalg.solve(self.tableau[:,:-1].T, obs).astype(bool)
+            # Déterminer si l'oservable est composée des stabilisateurs
+            coeffs = np.linalg.solve(self.tableau[:,:-1].T, obs).astype(bool)
             if np.logical_xor.reduce(r_values & coeffs):
                 prob = 0
             else:
                 prob = 1
-            measure = {"+": prob, "-": (prob+1)%2}
         else:
             prob = 1/2
-            measure = {"+": prob, "-": prob}
+        for sing_value in sing_values:
+            if sing_value == "+":
+                measure[sing_value] = prob
+            elif sing_value == "-":
+                measure[sing_value] = 1 - prob
         return measure
 
     def _find_inverse_of_bool_matrix(self):
         """
-        Appliquer l'élimination gaussienne sur le tableau complètement évolué (une matrice booléenne) dans GF(2).
+        Appliquer l'élimination gaussienne sur le tableau complètement évolué (une matrice
+        booléenne) dans GF(2).
         * La multiplication est équivalente à `&` et l'addition à `^` dans GF(2).
 
         Retourne
@@ -169,19 +188,21 @@ class GKSimulator:
 
     def run(self, q: QuantumCircuit):
         """
-        Mesurer une observable de Pauli donnée.
+        Mesurer une observable de Pauli donnée selon le circuit quantique fournit.
 
         Paramètre
         ---------
         q: QuantumCircuit
             Une liste de circuits quantiques générés par la classe `QuantumCircuit`.
         """
-        max_cores = 8
-        with Pool(processes=max_cores) as pool:
-            results = pool.map(self._single_circ_run, q.l)
+        with Pool(processes=self.max_cores) as pool:
+            sim_results = pool.map(self._single_circ_run, q.l)
+        results = [result for _, result in sim_results]
+        self.tableaux = [tableau for tableau, _ in sim_results]
+        # self.tableaux = tableaux
         # results = []
         # for circ in q.l:
         #     result = self._single_circ_run(circ)
         #     results.append(result)
-        print(results)
+        #     print(result)
         return results

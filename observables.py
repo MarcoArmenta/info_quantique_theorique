@@ -1,3 +1,10 @@
+"""
+Fichier contenant la classe permettant de traduire les observables sous la forme de `str` ou de
+vecteurs booléens.
+"""
+
+
+
 import numpy as np
 
 
@@ -8,16 +15,14 @@ class PauliObservable:
     """
     def __init__(self, obs: str):
         """
-        Description
-        -----------
-        Représenter une observable de Pauli
+        Représenter une observable de Pauli donnée.
 
         Paramètre
         ---------
         obs: str
             Une observable de Pauli.
         """
-        self.obs = obs
+        self.obs = obs.lower()
         self.str_to_bool(obs)
 
     def str_to_bool(self, obs: str):
