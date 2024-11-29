@@ -27,7 +27,7 @@ Ce devoir consiste à coder un simulateur de circuits quantiques de Clifford en 
     [
         7,
         'zzzzzzz',
-        ['-+-+-+-','---++++'],
+        ['+','-'],
         {
             'x':[6,4,1],
             'cx':[(1,2),(3,2)]
@@ -41,7 +41,7 @@ Ce devoir consiste à coder un simulateur de circuits quantiques de Clifford en 
     [
         6,
         'iiizzzz',
-        [+-+-,++++],
+        [+],
         {
             'y':[0],
             'z':[1,2,3,4,5],
@@ -82,4 +82,4 @@ Ici, 'r' doit être une liste de dictionnaires contenant les probabilités. Un d
 # POINTS BONUS
 * (15) Effectuez des tests unitaires (unittest) de vos méthodes par rapport à d'autres simulateurs Clifford de votre choix avec 20 circuits aléatoires chacun. 
 * (20) Les 3 personnes utilisant moins de mémoire globale dans la méthode s.run(q).
-* (20) Les 3 personnes utilisant moins de temps global dans la méthode s.run(q) sur votre ordinateur portable à 8 cœurs.
+* (20) Les 3 personnes utilisant moins de temps global dans la méthode s.run(q) sur mon ordinateur portable à 8 cœurs.
