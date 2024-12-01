@@ -16,6 +16,10 @@ print(table)
 
 n_qubit, Os, eig_vals, gates_dict = l[0]
 
+list_bool = [[1,0,1],[0,0,1],[1,1,0]]
+find = [True,False,True]
+print(find in list_bool)
+
 
 # loaded json = list(int #qubits, 'pauli string of observables',
 #                 ['list of eigenvalue string'], {'dict of gates and' : [which qubits to apply them to]})

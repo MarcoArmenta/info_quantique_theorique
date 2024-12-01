@@ -29,12 +29,11 @@ class GKSimulator:
         n = int(table.shape[0] / 2)
         for target in targets:
             launch, land = target
-            table[n:, -1] = (table[n:, -1] + (table[n:, launch - 1] * table[n:, land - 1 + n]) *
-                             ((table[n:, land - 1] + table[n:,
-                                                     launch - 1 + n] + 1) % 2)) % 2  # set r_i = r_i + x_ia*z_ia*(x_ib + z_ia + 1)
-            table[n:, land - 1] = (table[n:, land - 1] + table[n:, launch - 1]) % 2  # set x_ib = x_ib + x_ia
-            table[n:, launch - 1 + n] = (table[n:, launch - 1 + n] + table[n:,
-                                                                     land - 1 + n]) % 2  # set z_ia = z_ia + z_ib
+            table[:, -1] = (table[:, -1] + (table[:, launch] * table[:, land + n]) *
+                            ((table[:, land] + table[:, launch + n] + 1) % 2)) % 2  # set r_i = r_i + x_ia*z_ia*(x_ib + z_ia + 1)
+
+            table[:, land] = (table[:, land] + table[:, launch]) % 2  # set x_ib = x_ib + x_ia
+            table[:, launch + n] = (table[:, launch + n] + table[:, land + n]) % 2  # set z_ia = z_ia + z_ib
             return table
 
     def apply_h(self,table,targets):
@@ -97,8 +96,6 @@ class GKSimulator:
         :return:
         """
         for gate, targets in gates_dict.items():
-            print(gates_dict.items())
-            print(gate)
             table = self.apply_gate(table, gate, targets)
         return table
 
@@ -129,31 +126,52 @@ class GKSimulator:
         n = int(table.shape[0]/2)
         # check if p exists such as prod(x_pa for all a that are z in Os) = 1
         po = PauliObservable(Os).paulis_vec
-        zs = po[n:]
-        x_ixs = np.where(zs)[0]
-        p_bools = np.prod(table[n:, x_ixs], axis=1)
-        # case I
-        if np.array(p_bools).any():
-            out = [values, [0.5, 0.5]]
-        # case II
+        if sum(po) == 1:
+            zs = po[n:]
+            x_ixs = np.where(zs)[0]
+            p_bools = np.prod(table[n:, x_ixs], axis=1)
+            # case I
+            if np.array(p_bools).any():
+                out = [values, [0.5]*len(values)]
+            # case II
+            else:
+                table = np.append(table, np.zeros((1, 2*n+1)), axis=0)
+                for i in range(n):
+                    if np.prod(table[i, x_ixs]):
+                        table = self.row_sum(2*n, i+n, table)
+                result = table[-1, -1]
+                probs = []
+                for value in values:
+                    if value == "+" and result == 0:
+                        prob = 1
+                    elif value == "+" and result == 1:
+                        prob = 0
+                    if value == "-" and result == 0:
+                        prob = 0
+                    if value == "-" and result == 1:
+                        prob = 1
+                    probs.append(prob)
+                out = [values, probs]
         else:
-            table = np.append(table, np.zeros((1, 2*n+1)), axis=0)
-            for i in range(n):
-                if np.prod(table[i, x_ixs]):
-                    table = self.row_sum(2*n, i+n, table)
-            result = table[-1, -1]
-            probs = []
-            for value in values:
-                if value == "+" and result == 0:
-                    prob = 1
-                elif value == "+" and result == 1:
-                    prob = 0
-                if value == "-" and result == 0:
-                    prob = 0
-                if value == "-" and result == 1:
-                    prob = 1
-                probs.append(prob)
-            out = [values, probs]
+            stabs = table[n:, :2*n].tolist()
+            po = po.tolist()
+            if po in stabs:
+               ix = stabs.index(po)
+               result = table[n:, -1][ix]
+               probs = []
+               for value in values:
+                   if value == "+" and result == 0:
+                       prob = 1
+                   elif value == "+" and result == 1:
+                       prob = 0
+                   if value == "-" and result == 0:
+                       prob = 0
+                   if value == "-" and result == 1:
+                       prob = 1
+                   probs.append(prob)
+               out = [values, probs]
+            else:
+                out = [values, [0.5]*len(values)]
         return out
 
     def worker(self, qc):
