@@ -5,6 +5,7 @@
 """
 
 
+import numpy as np
 from quantumcircuit import QuantumCircuit
 from multiprocessing import Pool
 
@@ -13,13 +14,15 @@ class GKSimulator:
         self.quantum_circuit = quantum_circuit
 
     def measure_pauli(self, observable):
-        pass
+        circuit_matrix = np.array(self.quantum_circuit.stabilizers['Z'])
+        observable_matrix = np.array(observable.z_vector)
+        result = np.dot(circuit_matrix, observable_matrix)
+        return result
 
     def run(self, circuits):
         with Pool(processes=8) as pool:
             results = pool.map(self.simulate_single_circuit, circuits)
         return results
 
-    
     def simulate_single_circuit(self, circuit):
         return self.measure_pauli(circuit)
