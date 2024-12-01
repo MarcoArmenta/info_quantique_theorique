@@ -1,6 +1,7 @@
 """
 Auteur: Jérémie Boudreault
 """
+import multiprocessing as mp
 import numpy as np
 from observables import PauliObservable
 
@@ -111,8 +112,6 @@ class GKSimulator:
         return value
 
     def row_sum(self, h, i, table):
-        print(h)
-        print(i)
         n = int(table.shape[0] / 2)
         r_h, r_i = table[h, -1], table[i, -1]
         sum_val = 2*r_h + 2*r_i + sum([self.g_func(table[i, j], table[i, j+n], table[h, j], table[h, j+n])
@@ -121,10 +120,7 @@ class GKSimulator:
             table[h, -1] = 0
         elif sum_val % 4 == 2:
             table[h, -1] = 1
-        print("damn")
-        print(table)
         table[h, :2*n] = (np.copy(table[i, :2*n]) + np.copy(table[h, :2*n])) % 2
-        print(table)
         return table
 
     def measurement(self, table, Os, values):
@@ -136,11 +132,9 @@ class GKSimulator:
         p_bools = np.prod(table[n:, x_ixs], axis=1)
         # case I
         if np.array(p_bools).any():
-            print("case 1")
             out = [values, [0.5, 0.5]]
         # case II
         else:
-            print("case 2")
             table = np.append(table, np.zeros((1, 2*n+1)), axis=0)
             for i in range(n):
                 if np.prod(table[i, x_ixs]):
@@ -160,6 +154,16 @@ class GKSimulator:
             out = [values, probs]
         return out
 
+    def worker(self, qcs, start, end, output):
+        for i, qc in zip(range(start, end), qcs[start:end]):
+            n, Os, eig_vals, gates_dict = qc
+            table = self.get_initial_table(n)
+            evolved_table = self.apply_circuit(table, gates_dict)
+            values, probs = self.measurement(evolved_table, Os, eig_vals)
+            # measurement
+            result = {value + "1": prob for value, prob in zip(values, probs)}
+            output.put(result)
+
     def run(self, q):
         """
         Function that simulates the quantum circuit and get the expected probabilities
@@ -168,18 +172,32 @@ class GKSimulator:
         :return: List of dictionaries of eigenvalues and their associated probability
         """
         qcs = q.qc
-        r = []
-        for qc in qcs:
-            n, Os, eig_vals, gates_dict = qc
-            table = self.get_initial_table(n)
-            print(table)
-            evolved_table = self.apply_circuit(table, gates_dict)
-            print(evolved_table)
-            values, probs = self.measurement(evolved_table, Os, eig_vals)
-            # measurement
-            results = {value+"1": prob for value, prob in zip(values, probs)}
-            r.append(results)
-        return r
+        if len(qcs) <= 8:
+            core_count = len(qcs)
+        else:
+            core_count = 8
+        print(f"USING {core_count} CORES")
+
+        output = mp.Queue()
+        segment = len(qcs) // core_count
+        processes = []
+        for i in range(core_count):
+            start = i * segment
+            if i == core_count - 1:
+                end = len(qcs)  # Ensure the last segment goes up to the end
+            else:
+                end = start + segment
+            # Creating a process for each segment
+            p = mp.Process(target=self.worker, args=(qcs, start, end, output))
+            processes.append(p)
+            p.start()
+
+        for p in processes:
+            p.join()
+
+        results = [output.get() for p in processes]
+
+        return results
 
 
 
