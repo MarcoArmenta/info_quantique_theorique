@@ -97,6 +97,8 @@ class GKSimulator:
         :return:
         """
         for gate, targets in gates_dict.items():
+            print(gates_dict.items())
+            print(gate)
             table = self.apply_gate(table, gate, targets)
         return table
 
@@ -154,15 +156,14 @@ class GKSimulator:
             out = [values, probs]
         return out
 
-    def worker(self, qcs, start, end, output):
-        for i, qc in zip(range(start, end), qcs[start:end]):
-            n, Os, eig_vals, gates_dict = qc
-            table = self.get_initial_table(n)
-            evolved_table = self.apply_circuit(table, gates_dict)
-            values, probs = self.measurement(evolved_table, Os, eig_vals)
-            # measurement
-            result = {value + "1": prob for value, prob in zip(values, probs)}
-            output.put(result)
+    def worker(self, qc):
+        n, Os, eig_vals, gates_dict = qc
+        table = self.get_initial_table(n)
+        evolved_table = self.apply_circuit(table, gates_dict)
+        values, probs = self.measurement(evolved_table, Os, eig_vals)
+        # measurement
+        result = {value + "1": prob for value, prob in zip(values, probs)}
+        return result
 
     def run(self, q):
         """
@@ -178,24 +179,8 @@ class GKSimulator:
             core_count = 8
         print(f"USING {core_count} CORES")
 
-        output = mp.Queue()
-        segment = len(qcs) // core_count
-        processes = []
-        for i in range(core_count):
-            start = i * segment
-            if i == core_count - 1:
-                end = len(qcs)  # Ensure the last segment goes up to the end
-            else:
-                end = start + segment
-            # Creating a process for each segment
-            p = mp.Process(target=self.worker, args=(qcs, start, end, output))
-            processes.append(p)
-            p.start()
-
-        for p in processes:
-            p.join()
-
-        results = [output.get() for p in processes]
+        pool = mp.Pool(processes=core_count)
+        results = [pool.apply(self.worker, args=[qc]) for qc in qcs]
 
         return results
 
