@@ -22,6 +22,7 @@ if __name__ == '__main__':
     mem_before = get_memory_usage()
     start_time = time.perf_counter()
     r = s.run(q)
+    print(r)
     end_time = time.perf_counter()
     mem_after = get_memory_usage()
 
