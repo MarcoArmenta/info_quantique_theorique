@@ -24,6 +24,8 @@ if __name__ == '__main__':
     r = s.run(q)
     end_time = time.perf_counter()
     mem_after = get_memory_usage()
+    
+    print(r)
 
     print(f"Memory usage: {mem_after - mem_before} MB")
     print(f"Elapsed time: {end_time - start_time} seconds")
