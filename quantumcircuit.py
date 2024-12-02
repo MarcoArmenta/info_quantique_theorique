@@ -1,70 +1,61 @@
 # -*- coding: utf-8 -*-
 """
-
+Created on Sun Dec  1 20:08:49 2024
 
 @author: lenovo
 """
-
-
-
 import numpy as np
-
 class QuantumCircuit:
-    def __init__(self, circuit_data):
-        self.num_qubits = circuit_data[0]
-        self.observable = circuit_data[1]
-        self.eigenvalues = circuit_data[2]
-        self.gates = circuit_data[3:]
-        self.stabilizers = self.initialize_stabilizers()
-
-    def initialize_stabilizers(self):
+    def __init__(self,n_q): #n_q=nombre de qubits
+        self.n_q=n_q
+        self.tab_stbl=np.zeros((2*n_q,2*n_q),dtype=int)
+        self.phase=np.zeros(2*n_q,dtype=int)
+        self.portes=[]
+    
+    
+        for i in range(n_q):
+            self.tab_stbl[i,i+n_q]=1
+        
+    def ajouter_porte(self,porte,*qubits):
+        self.portes.append((porte,qubits))
        
-        num_stabilizers = self.num_qubits
-        x_matrix = np.zeros((num_stabilizers, self.num_qubits), dtype=int)
-        z_matrix = np.identity(self.num_qubits, dtype=int)
-        phase = np.zeros(num_stabilizers, dtype=int)
-        return {'X': x_matrix, 'Z': z_matrix, 'phase': phase}
-
-    def apply_gate(self, gate_type, qubits):
-        if gate_type == 'h':
-            self.apply_hadamard(qubits)
-        elif gate_type == 's':
-            self.apply_s(qubits)
-        elif gate_type == 'x' or gate_type == 'y' or gate_type == 'z':
-            self.apply_pauli(gate_type, qubits)
-        elif gate_type == 'cx':
-            self.apply_cx(qubits)
-        else:
-            raise ValueError(f"Porte non prise en charge: {gate_type}")
-
-    def apply_hadamard(self, qubits):
-        for qubit in qubits:
-         
-            pass
-
-    def apply_s(self, qubits):
-        for qubit in qubits:
-           
-            pass
-
-    def apply_pauli(self, gate, qubits):
-        for qubit in qubits:
-            if gate == 'x':
-                pass
-            elif gate == 'y':
-            
-                pass
-            elif gate == 'z':
-               
-                pass
-
-    def apply_cx(self, qubit_pairs):
-        for control, target in qubit_pairs:
-
-            
-            pass
-
-    def build_circuit(self):
-        for gate_dict in self.gates:
-            for gate, qubits in gate_dict.items():
-                self.apply_gate(gate, qubits)
+    def executer(self):
+        for porte, qubits in self.portes:
+            if porte=="h":
+                self.appliquer_h(*qubits)
+            elif porte=="s":
+                self.appliquer_s(*qubits)
+            elif porte=="cx":
+                self.appliquer_cx(*qubits)
+            else: 
+                raise ValueError(f"Porte Inconnue :{porte}")
+    
+    def appliquer_h(self,q_cible):    
+        for i in range(len(self.tab_stbl)):
+            self.tab_stbl[i,q_cible],self.tab_stbl[i,q_cible+self.n_q]=\
+                self.tab_stbl[i,q_cible+self.n_q],self.tab_stbl[i,q_cible]
+                                                            
+    def appliquer_s(self,q_cible):
+    
+        for i in range(len(self.tab_stbl)):
+            self.tab_stbl[i,q_cible]^=self.tab_stbl[i,q_cible+self.n_q]
+    
+    
+    def appliquer_cx(self,q_controle,q_cible):
+        
+        for i in range(len(self.tab_stbl)):
+            self.tab_stbl[i,q_cible]^=self.tab_stbl[i,q_controle]
+            self.tab_stbl[i,q_controle+self.n_q]^=self.tab_stbl[i,q_cible+self.n_q]
+    
+    
+    
+    def afficher_stabilisateurs(self):
+      
+        print("Stabilisateurs :")
+        for i in range(len(self.tab_stbl)):
+            x=''.join(map(str,self.tab_stbl[i,:self.n_q]))
+            z=''.join(map(str,self.tab_stbl[i,self.n_q]))
+            print(f"Stabilisateur{i+1}:X={x},Z={z},Phase={self.phases[i]}")
+    
+    
+    
