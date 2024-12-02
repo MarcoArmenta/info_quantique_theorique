@@ -15,30 +15,30 @@ class GKSimulator:
         results = []
         for cq in range(len(circuit.num_qubits)): # repeter la boucle pour chaque circuit
             Id = np.eye(2, dtype=int)
-            stab = [[Id for j in range(circuit.num_qubits[cq])] for i in range(circuit.num_qubits[cq])]
+            stab = [[Id for j in range(circuit.num_qubits[cq])] for i in range(circuit.num_qubits[cq])] #generer par chatgpt
             for i in range(circuit.num_qubits[cq]):
                 stab[i][i] = circuit.pauli_gate('z')
             
-            # Implémenter la logique pour simuler le circuit
             
-            # une partie de cette boucle est generer par AI
+            
+            # une partie de cette boucle generer par AI
             for gate_info in circuit.gates[cq]:
             #gate_info est un dictionnaire contient les portes logiques
                 for j in range(len(list(gate_info.keys()))):
-                    gate_type = list(gate_info.keys())[j]
-                    gate_targets = gate_info[gate_type]
-                    if gate_type == 'h':
+                    gate_type = list(gate_info.keys())[j]                    #generer par claud.ai
+                    gate_targets = gate_info[gate_type]                   #generer par claud.ai
+                    if gate_type == 'h':                   #generer par claud.ai
                         
-                        stab = circuit.apply_hadamard(stab, gate_targets)
-                    elif gate_type == 's':
+                        stab = circuit.apply_hadamard(stab, gate_targets)                   #generer par claud.ai
+                    elif gate_type == 's':                   #generer par claud.ai
                         
-                        stab = circuit.apply_s(stab, gate_targets)
-                    elif gate_type == 'cx':
+                        stab = circuit.apply_s(stab, gate_targets)                   #generer par claud.ai
+                    elif gate_type == 'cx':                   #generer par claud.ai
                         
-                        stab = circuit.apply_cx(stab, list(gate_targets))
-                    elif gate_type in ['x', 'y', 'z']:
+                        stab = circuit.apply_cx(stab, list(gate_targets))                   #generer par claud.ai
+                    elif gate_type in ['x', 'y', 'z']:                   #generer par claud.ai
                         
-                        stab = circuit.apply_pauli(gate_type, stab, gate_targets)
+                        stab = circuit.apply_pauli(gate_type, stab, gate_targets)                   #generer par claud.ai
             
             # implementer la mesure:
             
