@@ -48,6 +48,16 @@ class GKSimulator:
     def _single_circ_run(self, circ: list):
         """
         Extraire les mesures des probabilités des valeurs propres d'un circuit.
+
+        Paramètre
+        ---------
+        circ: list
+            Le circuit quantique pour lequel la simulation va être faite.
+
+            * circ[0]: nombre de qubits
+            * circ[1]: l'observable demandée
+            * circ[2]: les valeurs singulières demandées
+            * circ[3] (et plus): les `blocks` à appliquer dans le circuit quantique.
         """
         self.num_qubits = circ[0]
         observable = circ[1]
@@ -63,10 +73,10 @@ class GKSimulator:
             "cx": self._apply_cx_gate,
             "s":  self._apply_s_gate,
         }
-        # Updater le tableau
+        # Évoluer le tableau
         for block in blocks:
             self._update_tableau(block)
-        # Extrai les mesures
+        # Extrai les mesures des valeurs singulières
         if self.num_qubits > 0:
             result = self._measure_from_updated_tableau(observable, sing_values)
         else:
@@ -141,6 +151,19 @@ class GKSimulator:
         """
         Déterminer la mesure des valeurs propres "+" et "-" à la fin du circuit selon
         l'observable donnée.
+
+        Paramètres
+        ----------
+        observables: PauliObservable
+            L'observable sur laquelle les probabilités de mesures sont évaluées.
+        sing_values: list
+            La liste des valeurs singulières demandées par l'utilisateur.
+
+        Retourne
+        --------
+        measure: dict
+            Le dictionnaire contenant les probabilités de mesure des valeurs singulières qui ont été
+            demandées par l'utilisateur.
         """
         measure = {}
         obs = observable.obs_bool
@@ -172,6 +195,12 @@ class GKSimulator:
         ---------
         q: QuantumCircuit
             Une liste de circuits quantiques générés par la classe `QuantumCircuit`.
+
+        Retourne
+        --------
+        results: list[dict]
+            Une liste de dictionnaire contenant les probabilités de mesurer les valeurs singulières
+            demandées par l'utilisateur pour chacun des circuits demandées.
         """
         with Pool(processes=self.max_cores) as pool:
             results = pool.map(self._single_circ_run, q.l)
