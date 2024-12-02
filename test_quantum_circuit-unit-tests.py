@@ -4,14 +4,14 @@ import stim  # Stim est utilisé pour comparer les résultats
 from simulator import GKSimulator
 from quantumcircuit import QuantumCircuit
 
-class TestQuantumSimulatorWithStim(unittest.TestCase):
+class TestQuantumSimulatorWithStim(unittest.TestCase): # les commentaires généré par chatgpt
 
-    def setUp(self):
+    def setUp(self): # généré par chatgpt
         """
         Chargement du fichier JSON avec 20 circuits pour les tests.
         (GENERER PAR gpt-4o)
         """
-        with open("test_circuits.json", "r") as file:  # Changez le chemin si nécessaire
+        with open("test_circuits.json", "r") as file:  
             self.circuits_data = json.load(file)
 
     def convert_to_stim(self, circuit_data):
