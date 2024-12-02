@@ -55,7 +55,7 @@ class GKSimulator:
             result = self._measure_from_updated_tableau(observable, sing_values)
         else:
             result = {sing_value: None for sing_value in sing_values}
-        return self.tableau, result
+        return result
 
     def _update_tableau(self, block: dict):
         """
@@ -132,10 +132,6 @@ class GKSimulator:
         symplectic_products = np.logical_xor.reduce(stabs & x_and_z_swapped_obs, axis=1)
         if not np.any(symplectic_products):
             r_values = self.tableau[:,-1]
-            # tableau_T_inv = self._find_inverse_of_bool_matrix()
-            # coeffs = np.logical_xor.reduce(tableau_T_inv & obs, axis=1)
-            # print(coeffs)
-            # Déterminer si l'oservable est composée des stabilisateurs
             coeffs = np.linalg.solve(self.tableau[:,:-1].T, obs).astype(bool)
             if np.logical_xor.reduce(r_values & coeffs):
                 prob = 0
@@ -150,42 +146,6 @@ class GKSimulator:
                 measure[sing_value] = 1 - prob
         return measure
 
-    def _find_inverse_of_bool_matrix(self):
-        """
-        Appliquer l'élimination gaussienne sur le tableau complètement évolué (une matrice
-        booléenne) dans GF(2).
-        * La multiplication est équivalente à `&` et l'addition à `^` dans GF(2).
-
-        Retourne
-        --------
-        np.ndarray:
-            La matrice booléenne inverse du tableau.
-        """
-        # Augment the tableau boolean matrix (without the `r` column) with the identity ([A | I])
-        matrix = np.hstack((self.tableau[:,:-1].T, np.eye(2*self.num_qubits, dtype=bool)))
-
-        for col in range(2*self.num_qubits):
-            # Find pivot row with a True in the current column
-            pivot_row = None
-            for row in range(col, 2*self.num_qubits):
-                if matrix[row, col]:
-                    pivot_row = row
-                    break
-            # If no pivot is in this column, move to the next column
-            if pivot_row is None:
-                continue
-
-            # Switch the pivot row to the current row
-            if pivot_row != col:
-                matrix[[col, pivot_row]] = matrix[[pivot_row, col]]
-
-            # Eliminate other entries in the current column
-            for row in range(2*self.num_qubits):
-                if row != col and matrix[row, col]:
-                    matrix[row] ^= matrix[col]  # Row reduction using XOR
-
-        return matrix[:,2*self.num_qubits:] # extraire A^-1 de [I | A^-1]
-
     def run(self, q: QuantumCircuit):
         """
         Mesurer une observable de Pauli donnée selon le circuit quantique fournit.
@@ -196,13 +156,5 @@ class GKSimulator:
             Une liste de circuits quantiques générés par la classe `QuantumCircuit`.
         """
         with Pool(processes=self.max_cores) as pool:
-            sim_results = pool.map(self._single_circ_run, q.l)
-        results = [result for _, result in sim_results]
-        self.tableaux = [tableau for tableau, _ in sim_results]
-        # self.tableaux = tableaux
-        # results = []
-        # for circ in q.l:
-        #     result = self._single_circ_run(circ)
-        #     results.append(result)
-        #     print(result)
+            results = pool.map(self._single_circ_run, q.l)
         return results
