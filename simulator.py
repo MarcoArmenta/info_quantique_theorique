@@ -18,9 +18,27 @@ class GKSimulator:
     """
     Classe qui dispose d'une méthode pour mesurer une observable de Pauli donnée à partir d'une
     représentation de l'évolution des stabilizateurs par tableau.
+
+    La méthode implémentée dans cette classe est celle développée dans l'article suivant:
+    ```
+    @article{PhysRevA.70.052328,
+        title = {Improved simulation of stabilizer circuits},
+        author = {Aaronson, Scott and Gottesman, Daniel},
+        journal = {Phys. Rev. A},
+        volume = {70},
+        issue = {5},
+        pages = {052328},
+        numpages = {14},
+        year = {2004},
+        month = {Nov},
+        publisher = {American Physical Society},
+        doi = {10.1103/PhysRevA.70.052328},
+        url = {https://link.aps.org/doi/10.1103/PhysRevA.70.052328}
+    }
+    ```
     """
 
-    max_cores = 8 # Le nombre maximal de coeurs à utiliser pour la parallélization de la simulation
+    max_cores = 8
     def __init__(self):
         """
         Initialiser la classe `GKSimulator`.
@@ -36,8 +54,6 @@ class GKSimulator:
         sing_values = circ[2]
         blocks = circ[3:]
         dim = 2 * self.num_qubits
-        # n premières lignes: dé-stabilisateurs
-        # n dernières lignes: stabilisateurs
         self.tableau = np.eye(dim, dim+1, dtype=bool)
         self.apply_gate_fns_dict = {
             "x":  self._apply_x_gate,
@@ -62,6 +78,7 @@ class GKSimulator:
         Évoluer le tableau après l'application d'un bloc de portes `block` dans le circuit.
         """
         for gate, qubit_ids in block.items():
+            # Apply the corresponding gate in the circuit's given block
             self.apply_gate_fns_dict[gate](qubit_ids=qubit_ids)
 
     def _apply_x_gate(self, qubit_ids: list):
@@ -132,6 +149,7 @@ class GKSimulator:
         symplectic_products = np.logical_xor.reduce(stabs & x_and_z_swapped_obs, axis=1)
         if not np.any(symplectic_products):
             r_values = self.tableau[:,-1]
+            # Find the combination of stabilizers that generate the observable
             coeffs = np.linalg.solve(self.tableau[:,:-1].T, obs).astype(bool)
             if np.logical_xor.reduce(r_values & coeffs):
                 prob = 0
