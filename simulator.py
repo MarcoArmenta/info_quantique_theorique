@@ -74,7 +74,7 @@ class GKSimulator:
                     break
     
             if commute == False:
-                prob = {"+": "0.5", "-": "0.5"}
+                prob = {"+": 0.5, "-": 0.5}
             elif commute == True:
                 plus = False
                 obs_tens = 1
@@ -87,10 +87,10 @@ class GKSimulator:
                     if np.array_equal(obs_tens, stab_tens):
                         plus = True
                         break
-                    if plus == True:
-                        prob = {"+": "1", "-": "0"}
-                    elif plus == False:
-                        prob = {"+": "0", "-": "1"}
+                if plus == True:
+                    prob = {"+": 1, "-": 0}
+                elif plus == False:
+                    prob = {"+": 0, "-": 1}
             resultat = dict()
             for vp in circuit.eigenvalues[cq]:
                 if vp == '+':
