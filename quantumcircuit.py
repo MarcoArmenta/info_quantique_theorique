@@ -77,8 +77,6 @@ class QuantumCircuit:
         n_qubits = self.num_qubits_l[index]
         
         for i in range(n_qubits):
-            if (not commute_with_all_stabilisateur):
-                    pass
             interact = False
             # Observable is in the Stabilisateur Tab
             if np.array_equal(tableau_stabs[i][:2*n_qubits],tableau_observable[:2*n_qubits]) : 
