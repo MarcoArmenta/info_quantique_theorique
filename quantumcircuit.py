@@ -75,9 +75,10 @@ class QuantumCircuit:
         tableau_observable = self.observables_l[index].get_tableau()
         tableau_stabs = self.stabs_l[index].get_tableau()
         n_qubits = self.num_qubits_l[index]
-        
+        stab_commuting = []
         for i in range(n_qubits):
             interact = False
+            commute = True
             # Observable is in the Stabilisateur Tab
             if np.array_equal(tableau_stabs[i][:2*n_qubits],tableau_observable[:2*n_qubits]) : 
                 if ((tableau_stabs[i][-1] + tableau_observable[-1])% 2 == 0):
@@ -88,30 +89,44 @@ class QuantumCircuit:
                         self.eigen_value_l[index]['-1'] = 1
                 return
             for j in range(n_qubits):
-                if (not commute_with_all_stabilisateur):
-                    pass
-                if ((tableau_stabs[i][j] == 0 and tableau_stabs[i][j+n_qubits] == 0)
-                      or (tableau_observable[j] == 0 and tableau_observable[j+n_qubits] == 0)) :
+                if ((tableau_stabs[i][j] == 0 and tableau_stabs[i][j+n_qubits] == 0) 
+                    or (tableau_observable[j] == 0 and tableau_observable[j+n_qubits] == 0)) :
                     pass
                 elif (tableau_stabs[i][j] == tableau_observable[j] and 
                     tableau_stabs[i][j+n_qubits] == tableau_observable[j+n_qubits]):
                     interact = True
                 else :
                     commute_with_all_stabilisateur = False
-                    interact = False
-            if (interact):
-                parity_result = parity_result + tableau_stabs[i][-1] + tableau_observable[-1]
-                
+                    commute = False
+            if (commute and interact): 
+                stab_commuting.append(tableau_stabs[i])
+        
+        
+        phases = np.array([stab[-1] for stab in stab_commuting])
+        parity_result = np.sum(phases) + tableau_observable[-1] % 2
+        
+        
         if (commute_with_all_stabilisateur) :
 
-            if (parity_result % 2 == 0):
+            if (parity_result == 0):
                 if '+1' in self.eigen_value_l[index]:
                     self.eigen_value_l[index]['+1'] = 1
             else :
                 if '-1' in self.eigen_value_l[index]:
                     self.eigen_value_l[index]['-1'] = 1
             return
-        else : 
+        else :
+            
+            somme_mod_2 = np.bitwise_xor.reduce(stab_commuting)
+            if np.array_equal(somme_mod_2[:2*n_qubits],tableau_observable[:2*n_qubits]) : 
+                if (parity_result == 0):
+                    if '+1' in self.eigen_value_l[index]:
+                        self.eigen_value_l[index]['+1'] = 1
+                else :
+                    if '-1' in self.eigen_value_l[index]:
+                        self.eigen_value_l[index]['-1'] = 1
+                return
+            
             if '+1' in self.eigen_value_l[index]:
                 self.eigen_value_l[index]['+1'] = 0.5
             if '-1' in self.eigen_value_l[index]:
