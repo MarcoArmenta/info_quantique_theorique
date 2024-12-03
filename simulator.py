@@ -47,7 +47,7 @@ class GKSimulator:
 
     def _single_circ_run(self, circ: list):
         """
-        Extraire les mesures des probabilités des valeurs propres d'un circuit.
+        Extraire les probabilités de mesures des valeurs propres d'un circuit.
 
         Paramètre
         ---------
@@ -57,7 +57,7 @@ class GKSimulator:
             * circ[0]: nombre de qubits
             * circ[1]: l'observable demandée
             * circ[2]: les valeurs singulières demandées
-            * circ[3] (et plus): les `blocks` à appliquer dans le circuit quantique.
+            * circ[3:]: les `blocks` à appliquer dans le circuit quantique.
         """
         self.num_qubits = circ[0]
         observable = circ[1]
@@ -93,28 +93,28 @@ class GKSimulator:
 
     def _apply_x_gate(self, qubit_ids: list):
         """
-        Évoluer le tableau lorsqu'on applique la porte X sur les qubit `qubits_ids`.
+        Évoluer le tableau lorsqu'on applique la porte X sur les qubits `qubits_ids`.
         """
         cols = [idx + self.num_qubits for idx in qubit_ids] + [-1]
         self.tableau[:,-1] = np.logical_xor.reduce(self.tableau[:, cols], axis=1)
 
     def _apply_y_gate(self, qubit_ids: list):
         """
-        Évoluer le tableau lorsqu'on applique la porte Y sur les qubit `qubits_ids`.
+        Évoluer le tableau lorsqu'on applique la porte Y sur les qubits `qubits_ids`.
         """
         cols = qubit_ids + [idx + self.num_qubits for idx in qubit_ids] + [-1]
         self.tableau[:,-1] = np.logical_xor.reduce(self.tableau[:, cols], axis=1)
 
     def _apply_z_gate(self, qubit_ids: list):
         """
-        Évoluer le tableau lorsqu'on applique la porte Z sur les qubit `qubits_ids`.
+        Évoluer le tableau lorsqu'on applique la porte Z sur les qubits `qubits_ids`.
         """
         cols = qubit_ids + [-1]
         self.tableau[:,-1] = np.logical_xor.reduce(self.tableau[:, cols], axis=1)
 
     def _apply_h_gate(self, qubit_ids: list):
         """
-        Évoluer le tableau lorsqu'on applique la porte H sur les qubit `qubits_ids`.
+        Évoluer le tableau lorsqu'on applique la porte H sur les qubits `qubits_ids`.
         """
         x_cols = qubit_ids
         z_cols = [idx + self.num_qubits for idx in qubit_ids]
@@ -123,7 +123,7 @@ class GKSimulator:
 
     def _apply_cx_gate(self, qubit_ids: list):
         """
-        Évoluer le tableau lorsqu'on applique la porte CNOT sur les qubit `qubits_ids`.
+        Évoluer le tableau lorsqu'on applique la porte CNOT sur les qubits `qubits_ids`.
         """
         x_ctrl_qubits, x_trgt_qubits = list(zip(*qubit_ids))
         z_ctrl_qubits, z_trgt_qubits = [idx + self.num_qubits for idx in x_ctrl_qubits], [idx + self.num_qubits for idx in x_trgt_qubits]
@@ -140,7 +140,7 @@ class GKSimulator:
 
     def _apply_s_gate(self, qubit_ids: list):
         """
-        Évoluer le tableau lorsqu'on applique la porte S sur les qubit `qubits_ids`.
+        Évoluer le tableau lorsqu'on applique la porte S sur les qubits `qubits_ids`.
         """
         x_cols = qubit_ids
         z_cols = [idx + self.num_qubits for idx in qubit_ids]
