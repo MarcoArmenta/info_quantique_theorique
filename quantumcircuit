@@ -1,0 +1,38 @@
+class QuantumCircuit :
+
+    def __init__(self,circuit):
+        self.n_qubits = circuit[0]
+        self.stabilisateur = []
+        for i in range(self.n_qubits):
+            V_x = [0] * self.n_qubits # chaine de 0 pour les X
+            V_z = [0] * self.n_qubits # chaine de 0 pour les Z
+            V_z[i] = 1 # initialisation dans |0> pour chaque qubit dans Z
+            self.stabilisateur.append({'V_x': V_x, 'V_z' : V_z})
+
+    def application_hadamard(self,q):
+        for ligne in self.stabilisateur:
+            valeur_V_x_temporaire =ligne['V_x'][q] # garder la valeur de V_x pour ne pas se la faire écraser
+            ligne['V_x'][q] = ligne['V_z'][q] # échanger Vx pour v_z
+            ligne['V_z'][q] = valeur_V_x_temporaire # échanger V_z par V_x_temporaire
+
+    def application_de_S(self,q):
+        for ligne in self.stabilisateur:
+            ligne['V_z'][q]= (ligne['V_z'][q] + ligne['V_x'][q]) % 2  # On rajoute V_{x} à V_{z} modulo 2.
+
+    def CX(self, cible, controle): 
+        for ligne in self.stabilisateur:
+            ligne['V_z'][controle] = (ligne['V_z'][controle]+ligne['V_z'][cible]) %2 #On rajoute V_{z}^{cible} à V_{z}^{controle}  modulo 2.
+            ligne['V_x'][cible] = (ligne['V_x'][cible]+ligne['V_x'][controle]) %2    #On rajoute V_{x}^{controle} à V_{x}^{cible} modulo 2.
+
+    def application_de_pauli(self,q,pauli):
+        for ligne in self.stabilisateur :
+            valeur_V_x_temporaire =ligne['V_x'][q]
+            valeur_V_z_temporaire =ligne['V_z'][q] 
+            if pauli == 'X' :
+                ligne['V_x'][q] = valeur_V_z_temporaire
+                ligne['V_z'][q] = valeur_V_x_temporaire    # On échanger Vx par V_{z} et V_{z} par V_{x}.
+            elif pauli == 'Z' :
+                ligne['V_x'][q] = (ligne['V_z'][q]+ligne['V_x'][q]) %2 # On rajoute V_{z} à V_{x}
+            elif pauli == 'Y' :
+                ligne['V_x'][q] = (ligne['V_x'][q]+valeur_V_z_temporaire) %2 
+                ligne['V_z'][q] = (ligne['V_z'][q]+valeur_V_x_temporaire) %2 # On rajoute V_{z} à V_{x} et on rajoute V_{x} à V_{z}modulo 2
