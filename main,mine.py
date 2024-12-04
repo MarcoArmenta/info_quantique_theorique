@@ -1,3 +1,4 @@
+# j'ai changé le main, par main_mine car on n'a pas les mêmes définitions. 
 from simulator import GKSimulator
 import psutil
 import os
