@@ -1,0 +1,74 @@
+Définition : 
+
+Un stabilisateur S peut être écrit sous forme de matrice, où chaque ligne représente les générateursg_{i} et chaque colonne représente un qubit. Les générateurs peuvent quant à eux étre ecrit sous la forme vecteurs V_{x} et V_{z} de la façon suivante : g_{i}=\left[V_{x}|V_{z}\right]
+
+Exemple :
+
+g_{1}=\left[101,011\right]
+
+Cela signifie que le générateur implique une porte Xpour le premier qubit, une porte Z pour le 2eme qubit et une porte Y pour le 3eme qubit.
+
+Pour un stabilisateur de n qubits dans l'état initail \left|0\right\rangle ^{\otimes n}le stabilisateur s'écrira avec des généreteurs en V_{x}=0 et des générateurs en V_{z}=I
+
+Exemple pour n=3
+
+S=\left[\begin{array}{ccccccc}
+0 & 0 & 0 & | & 1 & 0 & 0\\
+0 & 0 & 0 & | & 0 & 1 & 0\\
+0 & 0 & 0 & | & 0 & 0 & 1
+\end{array}\right]
+
+Application des portes quantiques :
+
+Les application des portes H, S, CX et les portes de pauli dans le formalisme des stabilisateurs revient à transformer le stabilisateur de la sorte : 
+
+Pour la porte H:
+
+On échanger Vx par V_{z} et V_{z} par V_{x}.
+
+Pour la porte S:
+
+On rajouteV_{x} à V_{z} modulo 2.
+
+Pour la porte CX: pour un qubit cible et un qubit de contrôle on a :
+
+On rajoute V_{z}^{cible} à V_{z}^{controle} et on rajoute V_{x}^{controle} à V_{x}^{cible} modulo 2.
+
+Pour la porte X : 
+
+On échanger Vx par V_{z} et V_{z} par V_{x}.
+
+Pour la porte Y: 
+
+On rajoute V_{z} à V_{x} et on rajoute V_{x} à V_{z}modulo 2
+
+Pour la porte Z : 
+
+On rajoute V_{z} à V_{x}
+
+Mesure d'une observable de Pauli :
+
+La mesure de l'observable de pauli se fait de même que pour les générateurs, on réecrit l'observable O sous forme de vecteurs P_{x} et P_{z} où g_{i}=\left[P_{x}|P_{z}\right]
+
+Exemple :
+
+L'observable O=X\times Y\times Z, sous sa forme vectorielle est :O=\left[\begin{array}{ccccccc}
+1 & 1 & 0 & | & 0 & 1 & 1\end{array}\right]
+
+Dans la classe “PauliObservable” on a extrait les observables du fichier json puis on les a écrit sous forme vectorielle.
+
+Calcul du commutateur 
+
+Calcul du commutateur C, le calcul se fait de la sorte suivant : C=V_{x}P_{z}-V_{z}P_{x}
+
+On prend les termes croisés car V_{x} et P_{x} commutent, car cela revient à analyser deux opérateur X sur le même qubit.
+
+Analyse des commutateurs :
+
+Pour chaque ligne g_{i} de S on vérifie si g_{i}commute avec O :
+
+Si le stabilisateur commute avec l'observable, et l'observable est dans le systeme alors la probabilité de mesurer la valeur propore +1 est 1
+
+Si l'observable commute avec le stabilisateur et qu'elle n'est pas dans le systeme alors il existe deux valeurs propres possibles \pm1 avec une probabilité équiprobables pour les deux valeurs propres.
+
+Si le stabilisateur et l'observable ne commutent pas, la mesure de l'observable donne lieu à des résultats probabilistes, et non à des valeurs propres déterminées.
