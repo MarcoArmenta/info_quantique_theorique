@@ -5,7 +5,7 @@ from simulator import GKSimulator
 from quantumcircuit import QuantumCircuit
 
 class TestQuantumSimulatorWithStim(unittest.TestCase): # les commentaires généré par chatgpt
-
+    
     def setUp(self): # généré par chatgpt
         """
         Chargement du fichier JSON avec 20 circuits pour les tests.
@@ -36,7 +36,7 @@ class TestQuantumSimulatorWithStim(unittest.TestCase): # les commentaires géné
                         stim_circuit.append_operation(gate.upper(), [target])
         return stim_circuit
 
-    def test_compare_with_stim(self):
+    def test_compare_with_stim(self): # généré par chatgpt
         """
         Compare les résultats du simulateur avec ceux de Stim pour chaque circuit.
         """
@@ -84,5 +84,5 @@ class TestQuantumSimulatorWithStim(unittest.TestCase): # les commentaires géné
                     msg=f"Les probabilités pour {eigenvalue} ne correspondent pas (GKSimulator vs Stim)."
                 )
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     unittest.main()

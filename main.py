@@ -13,7 +13,7 @@ def get_memory_usage():
 
 
 if __name__ == '__main__':
-    with open('dummy_circuits.json', 'r') as file:
+    with open('test_circuits.json', 'r') as file:
         l = json.load(file)
 
     q = QuantumCircuit(l)
@@ -27,3 +27,4 @@ if __name__ == '__main__':
 
     print(f"Memory usage: {mem_after - mem_before} MB")
     print(f"Elapsed time: {end_time - start_time} seconds")
+    print(r)
