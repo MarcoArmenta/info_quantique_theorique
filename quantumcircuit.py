@@ -81,7 +81,7 @@ class QuantumCircuit:
         S = np.array([[1, 0], [0, 1j]])
         return S
 
-    def s_dag(self):
+    def s_dag(self): #generer par claud.ai
         
         
         S = np.array([[1, 0], [0, -1j]])
