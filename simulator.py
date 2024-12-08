@@ -241,7 +241,9 @@ class GKSimulator:
 
         return observable_expectation
 
-    def evolve_tableau(self, num_qubits, gates, observables, eigenvalues, verbose=True):
+    def evolve_tableau(
+        self, num_qubits, gates, observables, eigenvalues, verbose=False
+    ):
         """
         Evolve the stabilizer tableau with a list of gates.
 
@@ -311,6 +313,8 @@ class GKSimulator:
         if save_results:
             with open("results.json", "w", encoding="utf-8") as file:
                 json.dump(observable_expectation, file, ensure_ascii=False, indent=4)
+
+        return observable_expectation
 
     def show_tableau(self, pauli, signs, name="Tableau"):
         """
