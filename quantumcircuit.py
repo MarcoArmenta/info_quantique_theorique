@@ -19,7 +19,7 @@ class QuantumCircuit:
             
             eigenvalue = {}
             for value in elem[2] :
-                eigenvalue.update({value +""+'1' : 0})
+                eigenvalue.update({value : 0})
             self.eigen_value_l.append(eigenvalue)
             
             list_of_gates = []
@@ -82,11 +82,11 @@ class QuantumCircuit:
             # Observable is in the Stabilisateur Tab
             if np.array_equal(tableau_stabs[i][:2*n_qubits],tableau_observable[:2*n_qubits]) : 
                 if ((tableau_stabs[i][-1] + tableau_observable[-1])% 2 == 0):
-                    if '+1' in self.eigen_value_l[index]:
-                        self.eigen_value_l[index]['+1'] = 1
+                    if '+' in self.eigen_value_l[index]:
+                        self.eigen_value_l[index]['+'] = 1
                 else :
-                    if '-1' in self.eigen_value_l[index]:
-                        self.eigen_value_l[index]['-1'] = 1
+                    if '-' in self.eigen_value_l[index]:
+                        self.eigen_value_l[index]['-'] = 1
                 return
             for j in range(n_qubits):
                 if ((tableau_stabs[i][j] == 0 and tableau_stabs[i][j+n_qubits] == 0) 
@@ -109,28 +109,28 @@ class QuantumCircuit:
         if (commute_with_all_stabilisateur) :
 
             if (parity_result == 0):
-                if '+1' in self.eigen_value_l[index]:
-                    self.eigen_value_l[index]['+1'] = 1
+                if '+' in self.eigen_value_l[index]:
+                    self.eigen_value_l[index]['+'] = 1
             else :
-                if '-1' in self.eigen_value_l[index]:
-                    self.eigen_value_l[index]['-1'] = 1
+                if '-' in self.eigen_value_l[index]:
+                    self.eigen_value_l[index]['-'] = 1
             return
         else :
+            if (len(stab_commuting) > 0):
+                somme_mod_2 = np.bitwise_xor.reduce(stab_commuting)
+                if np.array_equal(somme_mod_2[:2*n_qubits],tableau_observable[:2*n_qubits]) : 
+                    if (parity_result == 0):
+                        if '+' in self.eigen_value_l[index]:
+                            self.eigen_value_l[index]['+'] = 1
+                    else :
+                        if '-' in self.eigen_value_l[index]:
+                            self.eigen_value_l[index]['-'] = 1
+                    return
             
-            somme_mod_2 = np.bitwise_xor.reduce(stab_commuting)
-            if np.array_equal(somme_mod_2[:2*n_qubits],tableau_observable[:2*n_qubits]) : 
-                if (parity_result == 0):
-                    if '+1' in self.eigen_value_l[index]:
-                        self.eigen_value_l[index]['+1'] = 1
-                else :
-                    if '-1' in self.eigen_value_l[index]:
-                        self.eigen_value_l[index]['-1'] = 1
-                return
-            
-            if '+1' in self.eigen_value_l[index]:
-                self.eigen_value_l[index]['+1'] = 0.5
-            if '-1' in self.eigen_value_l[index]:
-                self.eigen_value_l[index]['-1'] = 0.5
+            if '+' in self.eigen_value_l[index]:
+                self.eigen_value_l[index]['+'] = 0.5
+            if '-' in self.eigen_value_l[index]:
+                self.eigen_value_l[index]['-'] = 0.5
             return
  
 class StabilizerTableau:
