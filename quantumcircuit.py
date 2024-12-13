@@ -39,7 +39,7 @@ cnot_conjugation_dict = {############## Fait avec ChatGPT
     ('x', 'i'): ['x','x', 1],        
     ('y', 'i'): ['y','x', 1],       
     ('z', 'i'): ['z','i', 1],
-    # Control = i  ','      
+    # Control = i       
     ('i', 'x'): ['i','x', 1],          
     ('i', 'y'): ['z','y', 1],      
     ('i', 'z'): ['z','z', 1],        
@@ -84,16 +84,13 @@ class QuantumCircuit:
             n=circuit[0]    #Number of qubits in circuit
             op_list=circuit[3:] #List of gates
             stabs,factors,ops=[],[],[]  #List initialisation for stabilisator generators, factor (+1 or -1) and operators to apply
-
             for op_dict in op_list:     # Operators in string format
                 for op in op_dict:
                     for qubit in op_dict[op]:
                         if op=='cx':
-                            ops.append(str(op)+str(qubit[0])+str(qubit[1]))
+                            ops.append([str(op),str(qubit[0]),str(qubit[1])])
                         else:
                             ops.append(str(op)+str(qubit))
-
-
             for qubit in range(n): # Generator initialisation (eg: ziii,izii,iizi,iiiz, for 4 qubits)
                 dict_stab={}
                 for i in range(n):
@@ -105,10 +102,10 @@ class QuantumCircuit:
             for idx,stab in enumerate(stabs):   # Conjugates each stabilizer generator using conjugation_dict if operator is x, y, z, h, s or conjugation_dict_cx if operator is cx
                 for op in ops:
                     if op[0] in 'xyzhs':
-                        stab[op[-1]],factor_temp=conjugation_dict[(op[0],stab[op[-1]])]
+                        stab[op[1:]],factor_temp=conjugation_dict[(op[0],stab[op[1:]])]
                         factors[idx]*=factor_temp
-                    elif op[0:2]=='cx':
-                        stab[op[-2]],stab[op[-1]],factor_temp=cnot_conjugation_dict[(stab[op[-2]],stab[op[-1]])]
+                    elif op[0][0:2]=='cx':
+                        stab[op[1]],stab[op[2]],factor_temp=cnot_conjugation_dict[(stab[op[1]],stab[op[2]])]
                         factors[idx]*=factor_temp
                     
             for stab,fac in zip(stabs,factors):     # Adds a dictionnary entry for the phase (+ or -)
