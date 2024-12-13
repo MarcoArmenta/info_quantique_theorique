@@ -1,6 +1,7 @@
 class QuantumCircuit :
 
     def __init__(self,circuit):
+        if type(circuit[0]) is list : # ligne ajoutée afin de ne pas à avoir a extraire le nombre de qubits dans le fichier main.py
         self.n_qubits = circuit[0]
         self.stabilisateur = []
         for i in range(self.n_qubits):
