@@ -3,10 +3,13 @@ class GKSimulator:
     def __init__(self):
         return
     
-    def run(self, circ):
+    def run(self, circs):
         #Applies gates to |00...0> state, then measures observable
-        self.update_gates(circ)
-        return self.measure(circ)
+        results = []
+        for circ in circs.circuits:
+            self.update_gates(circ)
+            results.append(self.measure(circ))
+        return results
 
     def update_gates(self, circ):
         #Applies gates
@@ -29,16 +32,16 @@ class GKSimulator:
         #Checks if observable commutes with stabilizers, returns probability of specific eigenvalues
         temp_result = {}
         if circ.observ.commutes(circ.curr_stab):
-            temp_result = np.random.choice([{"+1":1, "-1":0}, {"+1":0, "-1":1}])
+            temp_result = np.random.choice([{"+":1, "-":0}, {"+":0, "-":1}])
 
         else:
-            temp_result = {"+1":0.5, "-1":0.5}
+            temp_result = {"+":0.5, "-":0.5}
 
         final_result = {}
         if '+' in circ.eigenvals:
-            final_result['+1']=temp_result['+1']
+            final_result['+']=temp_result['+']
         if '-' in circ.eigenvals:
-            final_result['-1']=temp_result['-1']
+            final_result['-']=temp_result['-']
         
         return final_result
 

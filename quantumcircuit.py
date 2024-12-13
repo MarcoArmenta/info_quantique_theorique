@@ -1,5 +1,12 @@
 from observables import PauliObservable
+
 class QuantumCircuit:
+    def __init__(self, datalist):
+        self.circuits = []
+        for list in datalist:
+            self.circuits.append(IndivQuantumCircuit(list))
+
+class IndivQuantumCircuit:
     def __init__(self, datalist):
         self.num_qubits = datalist[0]
         self.observ = PauliObservable(datalist[1])
@@ -21,7 +28,7 @@ class QuantumCircuit:
 
 
     def cx(self, qubits):
-            update = {'xy': 'yz', 'yx':'yi', 'xz':'yy', 'zx':'zx', 'yz':'xy', 'zy':'iy', 'xi':'xx', 'ix':'ix', 'yi':'yx', 'iy':'zy', 'zi':'zi', 'iz':'zz', 'ii':'ii'}
+            update = {'xy': 'yz', 'yx':'yi', 'xz':'yy', 'zx':'zx', 'yz':'xy', 'zy':'iy', 'xi':'xx', 'ix':'ix', 'yi':'yx', 'iy':'zy', 'zi':'zi', 'iz':'zz', 'ii':'ii', 'zz': 'iz', 'yy': 'xz', 'xx': 'xi'}
             for (i, stab) in enumerate(self.curr_stab):
                 for q in qubits:
                     new = update[stab.observ[q[0]]+stab.observ[q[1]]]
