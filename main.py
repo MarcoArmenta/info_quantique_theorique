@@ -8,6 +8,27 @@ import multiprocessing
 from quantumcircuit import QuantumCircuit
 from simulator import GKSimulator
 from observables import PauliObservables
+from grading.utils import *
+# inner psutil function
+def process_memory():
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return mem_info.rss
+
+
+# decorator function
+def profile(func):
+    def wrapper(*args, **kwargs):
+        mem_before = process_memory()
+        result = func(*args, **kwargs)
+        mem_after = process_memory()
+        print("{}: consumed memory: {:,}".format(
+            func.__name__,
+            mem_before, mem_after, mem_after - mem_before))
+
+        return result
+
+    return wrapper
 
 def get_memory_usage():
     process = psutil.Process(os.getpid())
@@ -45,20 +66,25 @@ def run_multiprocessing(circuit_list, n_cores):
     flattened_results = [item for sublist in results for item in sublist]
     return flattened_results
 
-if __name__ == '__main__':
-    with open('dummy_circuits.json', 'r') as file:
-        l = json.load(file)
+@profile
+def main():
+    with open('grading/grading_circuits.json', 'r') as file:
+        circuits_to_simulate = json.load(file)
 
-    
+    with open('grading/results.json', 'r') as file:
+        results = json.load(file)
 
-    mem_before = get_memory_usage()
     start_time = time.perf_counter()
 
-    r = run_multiprocessing(l, n_cores)
-    print(r)
+    runs = run_multiprocessing(circuits_to_simulate, n_cores)
 
     end_time = time.perf_counter()
-    mem_after = get_memory_usage()
 
-    print(f"Memory usage: {mem_after - mem_before} MB")
+    print("Homework Results: ", runs)
+    print("Actual Results: ", results)
+    print(f'Grade: {compare_results(runs, results)} out of {len(circuits_to_simulate)}.')
     print(f"Elapsed time: {end_time - start_time} seconds")
+
+
+if __name__ == '__main__':
+    main()
