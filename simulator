@@ -7,8 +7,8 @@ class GKSimulator:
     def __init__(self):
         pass
 
-    def charger_circuits(self, fichier_json): # code généré par l'IA pour ouvrir le fichier json
-        with open(fichier_json, 'r') as f:
+    def charger_circuits(self, CJ): # code généré par l'IA pour ouvrir le fichier json
+        with open('CJ.json', 'r') as f:
             circuits = json.load(f)
         return circuits
 
