@@ -4,7 +4,6 @@ Créé le Mer 4 Déc 2024 à 14:40:00
 
 @author: lenovo
 """
-
 import numpy as np
 
 class QuantumCircuit:
@@ -16,6 +15,13 @@ class QuantumCircuit:
         self.table_stabilisateurs = np.eye(2 * self.nombre_qubits, dtype=int)
 
     def appliquer_porte(self, porte, cibles):
+        # Vérifiez que les cibles sont fournies en nombre approprié
+        if porte in ["h", "s", "x", "z"] and len(cibles) != 1:
+            raise ValueError(f"Not enough targets provided for gate {porte}. Required: 1, Given: {len(cibles)}")
+        if porte == "cx" and len(cibles) != 2:
+            raise ValueError(f"Not enough targets provided for CNOT gate. Required: 2, Given: {len(cibles)}")
+        
+        # Appliquer les portes en fonction du type
         if porte == "h":
             self._appliquer_hadamard(cibles[0])
         elif porte == "s":
@@ -25,10 +31,11 @@ class QuantumCircuit:
         elif porte == "z":
             self._appliquer_pauli_z(cibles[0])
         elif porte == "cx":
-            self._appliquer_cnot(*cibles[0])
+            self._appliquer_cnot(cibles[0], cibles[1])
 
     def _appliquer_hadamard(self, qubit):
-        self.table_stabilisateurs[:, [qubit, qubit + self.nombre_qubits]] = self.table_stabilisateurs[:, [qubit + self.nombre_qubits, qubit]]
+        idx = qubit, qubit + self.nombre_qubits
+        self.table_stabilisateurs[:, idx] = self.table_stabilisateurs[:, idx[::-1]]
 
     def _appliquer_phase(self, qubit):
         self.table_stabilisateurs[:, qubit + self.nombre_qubits] ^= self.table_stabilisateurs[:, qubit]
@@ -44,5 +51,5 @@ class QuantumCircuit:
         self.table_stabilisateurs[:, cible + self.nombre_qubits] ^= self.table_stabilisateurs[:, contrôle + self.nombre_qubits]
 
     def exécuter(self):
-        for porte, cibles in self.portes.items():            
+        for porte, cibles in self.portes.items():
             self.appliquer_porte(porte, cibles)
