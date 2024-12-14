@@ -6,7 +6,7 @@ Created on Wed Nov 13 19:43:06 2024
 """
 
 import numpy as np
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 
 class GKSimulator:
     def __init__(self):
@@ -23,10 +23,11 @@ class GKSimulator:
         Returns:
             dict: Measurement results for this circuit configuration
         """
-        Id = np.eye(2, dtype=int)
-        stab = [[Id for j in range(circuit.num_qubits[cq])] for i in range(circuit.num_qubits[cq])]  #generer par chatgpt
+        
+        stab = [["i" for j in range(circuit.num_qubits[cq])] for i in range(circuit.num_qubits[cq])]  #generer par chatgpt
+        phase = [1 for j in range(circuit.num_qubits[cq])]  #generer par chatgpt
         for i in range(circuit.num_qubits[cq]):
-            stab[i][i] = circuit.pauli_gate('z')
+            stab[i][i] = "z"
         
         # Simulate circuit gates
         for gate_info in circuit.gates[cq]:         # une partie de cette boucle generer par AI
@@ -34,70 +35,43 @@ class GKSimulator:
                 gate_type = list(gate_info.keys())[j]                    #generer par claud.ai
                 gate_targets = gate_info[gate_type]                    #generer par claud.ai
                 if gate_type == 'h':                    #generer par claud.ai
-                    stab = circuit.apply_hadamard(stab, gate_targets)                    #generer par claud.ai
+                    stab, phase = circuit.apply_hadamard(stab, gate_targets, phase)                    #generer par claud.ai
                 elif gate_type == 's':                    #generer par claud.ai
-                    stab = circuit.apply_s(stab, gate_targets)                    #generer par claud.ai
+                    stab, phase = circuit.apply_s(stab, gate_targets, phase)                    #generer par claud.ai
                 elif gate_type == 'cx':                    #generer par claud.ai
-                    stab = circuit.apply_cx(stab, list(gate_targets))                    #generer par claud.ai
+                    stab, phase = circuit.apply_cx(stab, list(gate_targets), phase)                    #generer par claud.ai
                 elif gate_type in ['x', 'y', 'z']:                    #generer par claud.ai
-                    stab = circuit.apply_pauli(gate_type, stab, gate_targets)                    #generer par claud.ai                    #generer par claud.ai
+                    stab, phase = circuit.apply_pauli(gate_type, stab, gate_targets, phase)                    #generer par claud.ai                    #generer par claud.ai
         
         # Measurement logic
         obs_str = circuit.observable[cq]
         obs = list(obs_str)
-        obser = []
-        index = []
+        
+        plus = False
+        count = -1
         ind = 0
-        for p in obs:
-            if p == 'i':
-                obser.append(np.eye(2, dtype=int))
-            elif p == 'z':
-                obser.append(circuit.pauli_gate('z'))
-                index.append(ind)
-            elif p == 'x':
-                obser.append(circuit.pauli_gate('x'))
-                index.append(ind)
-            ind = ind + 1
-        
-        obs_tens = 1
-        for i in index:
-            obs_tens = np.kron(obs_tens, obser[i])
-        
-        commute = True
         for stab_ in stab:
-            stab_tens = 1
-            for i in index:
-                stab_tens = np.kron(stab_tens, stab_[i])
-            
-            if not np.array_equal(np.dot(stab_tens, obs_tens), np.dot(obs_tens, stab_tens)):
-                commute = False
+            count = count + 1    
+            if obs == stab_:
+                plus = True
+                ind = count
                 break
-
-        if commute == False:
+            
+        if plus == True and phase[ind] == 1:
+            prob = {"+": 1.0, "-": 0.0}
+        elif plus == True and phase[ind] == -1:
+            prob = {"+": 0.0, "-": 1.0}
+        else:
             prob = {"+": 0.5, "-": 0.5}
-        elif commute == True:
-            plus = False
-            obs_tens = 1
-            for i in range(len(obser)):
-                obs_tens = np.kron(obs_tens, obser[i])
-            for stab_ in stab:
-                stab_tens = 1
-                for i in range(len(obser)):
-                    stab_tens = np.kron(stab_tens, stab_[i])
-                if np.array_equal(obs_tens, stab_tens):
-                    plus = True
-                    break
-            if plus == True:
-                prob = {"+": 1, "-": 0}
-            elif plus == False:
-                prob = {"+": 0, "-": 1}
         
         resultat = dict()
         for vp in circuit.eigenvalues[cq]:
             if vp == '+':
-                resultat.update({'+1': prob['+']})
+                resultat.update({'+': prob['+']})
+                #resultat.update({'+': 0.5})
             elif vp == '-':
-                resultat.update({'-1': prob['-']})
+                resultat.update({'-': prob['-']})
+                #resultat.update({'-': 0.5})
         
         return resultat
 
@@ -111,7 +85,7 @@ class GKSimulator:
         Returns:
             list: Results for each circuit configuration
             """
-        num_cores = cpu_count()
+        num_cores = 8
         with Pool(processes=num_cores) as pool:  
             # Map the process_circuit function across the range of num_qubits
             results = pool.starmap(self.process_circuit, [(circuit, cq) for cq in range(len(circuit.num_qubits))])

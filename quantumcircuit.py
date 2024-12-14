@@ -21,51 +21,116 @@ class QuantumCircuit:
             self.gates.append(circuit_info[3:])              #generer par claud.ai
             
 
-    def apply_hadamard(self, stabilizers, targets):
+    def apply_hadamard(self, stabilizers, targets, phase):
         
         for i in range(len(stabilizers)):
             for target in targets:
-                if not np.array_equal(stabilizers[i][target], np.eye(2, dtype=int)):
-                    stabilizers[i][target] = np.round(np.dot(self.hadamard(), np.round(np.dot(stabilizers[i][target], self.hadamard())).astype(int))).astype(int)
+                if not stabilizers[i][target] == "i":
+                    if stabilizers[i][target] == "z":
+                        stabilizers[i][target] = "x" 
+                        
+                    elif stabilizers[i][target] == "x":
+                        stabilizers[i][target] = "z"
+                        
+                    elif stabilizers[i][target] == "y":
+                        phase[i] = -1 * phase[i]
+                    
         
-        return stabilizers
+        return stabilizers, phase
     
-    def apply_s(self, stabilizers, targets):
+    def apply_s(self, stabilizers, targets, phase):
         
         for i in range(len(stabilizers)):
             for target in targets:
-                if not np.array_equal(stabilizers[i][target], np.eye(2, dtype=int)):
-                    stabilizers[i][target] = np.dot(self.s_gate(), np.dot(stabilizers[i][target], self.s_dag()))
+                if not stabilizers[i][target] == "i":
+                    if stabilizers[i][target] == "z":
+                        True 
+                    elif stabilizers[i][target] == "x":
+                        stabilizers[i][target] = "y"
+                        
+                    elif stabilizers[i][target] == "y":
+                        stabilizers[i][target] = "x"
+                        phase[i] = -1 * phase[i]
+                    #stabilizers[i][target] = np.dot(self.s_gate(), np.dot(stabilizers[i][target], self.s_dag()))
         
-        return stabilizers
+        return stabilizers, phase
     
-    def apply_pauli(self, gate_type, stabilizers, targets):
+    def apply_pauli(self, gate_type, stabilizers, targets, phase):
         
         for i in range(len(stabilizers)):
             for target in targets:
-                if not np.array_equal(stabilizers[i][target], np.eye(2, dtype=int)):
-                    stabilizers[i][target] = np.dot(self.pauli_gate(gate_type), np.dot(stabilizers[i][target], self.pauli_gate(gate_type)))
+                if not stabilizers[i][target] == "i":
+                    if gate_type == "x":
+                        if stabilizers[i][target] == "x":
+                             
+                            True
+                        elif stabilizers[i][target] == "y":
+                            phase[i] = -1 * phase[i]
+                            
+                        elif stabilizers[i][target] == "z":
+                        
+                            phase[i] = -1 * phase[i]
+                    
+                    if gate_type == "y":
+                        if stabilizers[i][target] == "y":
+                             
+                            True
+                        elif stabilizers[i][target] == "x":
+                            phase[i] = -1 * phase[i]
+                            
+                        elif stabilizers[i][target] == "z":
+                        
+                            phase[i] = -1 * phase[i]
+                            
+                    if gate_type == "z":
+                        if stabilizers[i][target] == "z":
+                             
+                            True
+                        elif stabilizers[i][target] == "x":
+                            phase[i] = -1 * phase[i]
+                            
+                        elif stabilizers[i][target] == "y":
+                        
+                            phase[i] = -1 * phase[i]
+                    
         
-        return stabilizers
+        return stabilizers, phase
     
-    def apply_cx(self, stabilizers, targets):
+    def apply_cx(self, stabilizers, targets, phase):
+        
+        pauli_mult = {"ii": ("i", 1), "iz": ("z", 1), "ix": ("x", 1), "iy": ("y",1), "zi": ("z", 1), "xi": ("x", 1), "yi": ("y", 1), "zx": ("y", 1j), "xy": ("z", 1j), "yz": ("x", 1j), "xz": ("y", -1j), "yx": ("z", -1j), "zy": ("x", -1j)}
         
         for i in range(len(stabilizers)):
             for target in targets:
                 target0 = list(target)[0]
                 target1 = list(target)[1]
-                np.eye(2, dtype=int)
-                px = np.eye(2, dtype=int)
-                pz = np.eye(2, dtype=int)
-                if stabilizers[i][target0][0][1] != 0:
-                    px = self.pauli_gate('x')
-                if stabilizers[i][target1][0][1] + stabilizers[i][target1][1][0] == 0 and not np.array_equal(stabilizers[i][target1], np.eye(2, dtype=int)):
-                    pz = self.pauli_gate('z')
                 
-                stabilizers[i][target0] = np.dot(stabilizers[i][target0], pz)
-                stabilizers[i][target1] = np.dot(px, stabilizers[i][target1])
+                cible = "ii"
+                controle = "ii"
+                if stabilizers[i][target0] == "z":
+                    cible = "i" + stabilizers[i][target1] 
+                elif stabilizers[i][target0] == "x":
+                    cible = "x" + stabilizers[i][target1]
+                        
+                elif stabilizers[i][target0] == "y":
+                    cible = "x" + stabilizers[i][target1]
+                    #phase[i] = -1 * phase[i]
                 
-        return stabilizers                
+                if stabilizers[i][target1] == "x":
+                    controle = stabilizers[i][target0] + "i"
+                elif stabilizers[i][target1] == "z":
+                    controle = stabilizers[i][target0] + "z"
+                        
+                elif stabilizers[i][target1] == "y":
+                    controle = stabilizers[i][target0] + "z"
+                    #phase[i] = -1 * phase[i]
+                
+                stabilizers[i][target0] = list(pauli_mult[controle])[0]
+                phase[i] = phase[i] * list(pauli_mult[controle])[1]
+                stabilizers[i][target1] = list(pauli_mult[cible])[0]
+                phase[i] = phase[i] * list(pauli_mult[cible])[1]
+        
+        return stabilizers, phase                
 
     
     
