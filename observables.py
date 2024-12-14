@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Créé le Mer 4 Déc 2024 à 14:40:00
+
+@author: lenovo
+"""
 class PauliObservable:
     def __init__(self, chaine_pauli):
         self.chaine_pauli = chaine_pauli
