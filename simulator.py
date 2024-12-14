@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Créé le Mer 4 Déc 2024 à 14:40:00
+
+@author: lenovo
+"""
 from quantumcircuit import QuantumCircuit
 from observables import PauliObservable
 import json
