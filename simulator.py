@@ -14,6 +14,7 @@ class GKSimulator:
 
     def verifier_commutateurs(self, circuit, observable): # vérification de la commutation
         px_pz = observable.convertir_en_px_pz()
+        #print(f"Observable convertie : P_x = {px_pz['P_x']}, P_z = {px_pz['P_z']}")
         P_x = px_pz['P_x']
         P_z = px_pz['P_z']
         # calcul du commutateur
@@ -21,19 +22,23 @@ class GKSimulator:
         for stabilisateur in circuit.stabilisateur:
             V_x = stabilisateur['V_x']
             V_z = stabilisateur['V_z']
+            s = stabilisateur['s']
             commutateur = 0
             for i in range(len(V_x)):
-                commutateur = (commutateur + (V_x[i] * P_z[i] - V_z[i] * P_x[i])) % 2 # le calcul a été fait en prenant des termes croisés
-            commutateurs.append(commutateur)
+                commutateur = (V_x[i] * P_z[i] - V_z[i] * P_x[i]) % 2 # le calcul a été fait en prenant des termes croisés
+            commutateurs.append((commutateur,s))
+        #print(f"Commutateurs calculés : {commutateurs}")
         return commutateurs
 
     def mesurer_observable(self, circuit, observable): # Analyse du commutateur
         commutateurs = self.verifier_commutateurs(circuit, observable)
-        if commutateurs == [0] * len(commutateurs):  # Tous les commutateurs sont nuls
+        #print(f"Commutateurs pour le circuit : {commutateurs}")
+        if commutateurs == [(0,0)] * len(commutateurs):  # Tous les commutateurs sont nuls
             px_pz = observable.convertir_en_px_pz()
             P_x, P_z = px_pz['P_x'], px_pz['P_z']
+
             for stabilisateur in circuit.stabilisateur:
-                if stabilisateur['V_x'] == P_x and stabilisateur['V_z'] == P_z:
+                if stabilisateur['V_x'] == P_x and stabilisateur['V_z'] == P_z and stabilisateur['s'] == 0:
                     return {"+1": 1, "-1": 0}  #  probabilité de mesurer la valeur propore +1 est 1
             return {"+1": 0.5, "-1": 0.5}  # deux valeurs propres possibles \pm1 avec une probabilité équiprobables pour les deux valeurs propres.
         else:
@@ -71,11 +76,11 @@ class GKSimulator:
         resultat = self.mesurer_observable(circuit, observable_pauli)
         return {'resultat': resultat}
 
-    def simuler(self, fichier_json):
+    def run(self, fichier_json):
         circuits_data = self.charger_circuits(fichier_json)
 
         # Utiliser un pool de processus pour la simulation parallèle  # code généré par l'IA. Mon code a du être modifié car d'après ce que j'ai compris, le multiprocess ne peut pas lire de liste, du coup j'ai séparé les simulations, un pour un circuit, puis l'autre pour la liste.
-        with Pool(processes=cpu_count()) as pool: # ici remplacer cpu_count() par le nombre de coeur souhaité
+        with Pool(processes=2) as pool: # ici remplacer cpu_count() par le nombre de coeur souhaité
             resultats = pool.map(self.simuler_circuit, circuits_data)
 
         for i, resultat in enumerate(resultats):
