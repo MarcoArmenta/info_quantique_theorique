@@ -7,11 +7,11 @@ class PauliObservable:
         P_x = [0] * self.n_qubits
         P_z = [0] * self.n_qubits
         for i, pauli in enumerate(self.chaine_pauli):
-            if pauli == 'X':
+            if pauli == 'x':
                 P_x[i] = 1
-            elif pauli == 'Z':
+            elif pauli == 'z':
                 P_z[i] = 1
-            elif pauli == 'Y':
+            elif pauli == 'y':
                 P_x[i] = 1
                 P_z[i] = 1
         return {'P_x': P_x, 'P_z': P_z}
