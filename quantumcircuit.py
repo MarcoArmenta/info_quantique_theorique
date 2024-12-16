@@ -1,7 +1,8 @@
 class QuantumCircuit :
 
     def __init__(self,circuit):
-        if type(circuit[0]) is list : # ligne ajoutée afin de ne pas à avoir a extraire le nombre de qubits dans le fichier main.py
+        if type(circuit[0]) is list :
+            circuit = circuit[0]
         self.n_qubits = circuit[0]
         self.stabilisateur = []
         for i in range(self.n_qubits):
@@ -30,10 +31,9 @@ class QuantumCircuit :
             valeur_V_x_temporaire =ligne['V_x'][q]
             valeur_V_z_temporaire =ligne['V_z'][q] 
             if pauli == 'X' :
-                ligne['V_x'][q] = valeur_V_z_temporaire
-                ligne['V_z'][q] = valeur_V_x_temporaire    # On échanger Vx par V_{z} et V_{z} par V_{x}.
+                ligne['V_z'][q] = -1 * valeur_V_z_temporaire    # On échanger Vx par V_{z} et V_{z} par V_{x}.
             elif pauli == 'Z' :
-                ligne['V_x'][q] = (ligne['V_z'][q]+ligne['V_x'][q]) %2 # On rajoute V_{z} à V_{x}
+                ligne['V_x'][q] = -1 * valeur_V_x_temporaire # On rajoute V_{z} à V_{x}
             elif pauli == 'Y' :
-                ligne['V_x'][q] = (ligne['V_x'][q]+valeur_V_z_temporaire) %2 
-                ligne['V_z'][q] = (ligne['V_z'][q]+valeur_V_x_temporaire) %2 # On rajoute V_{z} à V_{x} et on rajoute V_{x} à V_{z}modulo 2
+                ligne['V_x'][q] = -1 * valeur_V_x_temporaire
+                ligne['V_z'][q] = -1 * valeur_V_z_temporaire
