@@ -30,19 +30,41 @@ class GKSimulator:
         #print(f"Commutateurs calculés : {commutateurs}")
         return commutateurs
 
+
     def mesurer_observable(self, circuit, observable): # Analyse du commutateur
         commutateurs = self.verifier_commutateurs(circuit, observable)
-        #print(f"Commutateurs pour le circuit : {commutateurs}")
+
         if commutateurs == [(0,0)] * len(commutateurs):  # Tous les commutateurs sont nuls
             px_pz = observable.convertir_en_px_pz()
             P_x, P_z = px_pz['P_x'], px_pz['P_z']
 
             for stabilisateur in circuit.stabilisateur:
-                if stabilisateur['V_x'] == P_x and stabilisateur['V_z'] == P_z and stabilisateur['s'] == 0:
-                    return {"+1": 1, "-1": 0}  #  probabilité de mesurer la valeur propore +1 est 1
-            return {"+1": 0.5, "-1": 0.5}  # deux valeurs propres possibles \pm1 avec une probabilité équiprobables pour les deux valeurs propres.
-        else:
-            return "Probabiliste"
+                if stabilisateur['V_x'] == P_x and stabilisateur['V_z'] == P_z :
+                    if stabilisateur['s'] == 0 :
+                        return {"+": 1}  #  probabilité de mesurer la valeur propore + est 1
+                    else :
+                        return {"-": 1}  #  probabilité de mesurer la valeur propore - est 1      
+            return {"+": 0.5, "-": 0.5}  # deux valeurs propres possibles \pm1 avec une probabilité équiprobables pour les deux valeurs propres.
+        
+        # pas de commutation ###### nouvelles modifications au code
+        probabilités = {"+": 0, "-": 0}        
+        for stabilisateur in circuit.stabilisateur :
+            if stabilisateur['s'] == 0:
+                probabilités["+"] = probabilités["+"] + 0.5
+            else:
+                probabilités["-"] = probabilités["-"] + 0.5
+        
+        # normalisation
+        normalisation = probabilités["+"] + probabilités["+"]
+        probabilités["+"] = probabilités["+"] / normalisation
+        probabilités["-"] = probabilités["-"] / normalisation
+
+        if probabilités["+"] == 0:
+            return {"-": probabilités["-"]}  # retourne la probabilité de "-"
+        elif probabilités["-"] == 0:
+            return {"+": probabilités["+"]}  # retourne la probabilité de "+"
+
+        return {"+": probabilités["+"], "-": probabilités["-"]}
 
     def simuler_circuit(self, circuit_data):
         n_qubits = circuit_data[0] # Nombre de qubits extrait du fichier json
@@ -74,7 +96,7 @@ class GKSimulator:
 
         # Mesurer l'observable
         resultat = self.mesurer_observable(circuit, observable_pauli)
-        return {'resultat': resultat}
+        return resultat
 
     def run(self, fichier_json):
         circuits_data = self.charger_circuits(fichier_json)
@@ -83,5 +105,4 @@ class GKSimulator:
         with Pool(processes=2) as pool: # ici remplacer cpu_count() par le nombre de coeur souhaité
             resultats = pool.map(self.simuler_circuit, circuits_data)
 
-        for i, resultat in enumerate(resultats):
-            print(f"Circuit {i+1} : Résultat = {resultat['resultat']}")
+            print(resultats)
