@@ -2,7 +2,7 @@ class QuantumCircuit :
 
     def __init__(self,circuit):
         if type(circuit[0]) is list :
-            circuit = circuit[0]
+            circuit = circuit[0]  # Sélectionne le premier circuit si nécessaire
         self.n_qubits = circuit[0]
         self.stabilisateur = []
         for i in range(self.n_qubits):
@@ -31,9 +31,9 @@ class QuantumCircuit :
             valeur_V_x_temporaire =ligne['V_x'][q]
             valeur_V_z_temporaire =ligne['V_z'][q] 
             if pauli == 'X' :
-                ligne['V_z'][q] = -1 * valeur_V_z_temporaire    # On échanger Vx par V_{z} et V_{z} par V_{x}.
+                ligne['V_z'][q] = valeur_V_z_temporaire    
             elif pauli == 'Z' :
-                ligne['V_x'][q] = -1 * valeur_V_x_temporaire # On rajoute V_{z} à V_{x}
+                ligne['V_x'][q] = valeur_V_x_temporaire
             elif pauli == 'Y' :
-                ligne['V_x'][q] = -1 * valeur_V_x_temporaire
-                ligne['V_z'][q] = -1 * valeur_V_z_temporaire
+                ligne['V_x'][q] = valeur_V_x_temporaire
+                ligne['V_z'][q] = valeur_V_z_temporaire
