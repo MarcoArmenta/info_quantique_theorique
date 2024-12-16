@@ -1,6 +1,7 @@
 Définition : 
 
-Un stabilisateur S peut être écrit sous forme de matrice, où chaque ligne représente les générateursg_{i} et chaque colonne représente un qubit. Les générateurs peuvent quant à eux étre ecrit sous la forme vecteurs V_{x} et V_{z} de la façon suivante : g_{i}=\left[V_{x}|V_{z}\right]
+Un stabilisateur S peut être écrit sous forme de matrice, où chaque ligne représente les générateurs g_{i} et chaque colonne représente un qubit. Les générateurs peuvent quant à eux étre ecrit sous la forme vecteurs V_{x} et V_{z} de la façon suivante : g_{i}=\left[V_{x}|V_{z}\right]
+Pour être plus rigoureux on rajoute une colonne pour la phase, qui jouera un role imporant lors de l'application des portes de Pauli.
 
 Exemple :
 
@@ -18,6 +19,7 @@ S=\left[\begin{array}{ccccccc}
 0 & 0 & 0 & | & 0 & 0 & 1
 \end{array}\right]
 
+où la phase est nulle
 Application des portes quantiques :
 
 Les application des portes H, S, CX et les portes de pauli dans le formalisme des stabilisateurs revient à transformer le stabilisateur de la sorte : 
@@ -36,15 +38,15 @@ On rajoute V_{z}^{cible} à V_{z}^{controle} et on rajoute V_{x}^{controle} à V
 
 Pour la porte X : 
 
-On échanger Vx par V_{z} et V_{z} par V_{x}.
+On modifie la phase V_{z} devient - V_{z}.
+
+Pour la porte Z :
+
+On modifie la phase V_{x} devient - V_{x}.
 
 Pour la porte Y: 
 
-On rajoute V_{z} à V_{x} et on rajoute V_{x} à V_{z}modulo 2
-
-Pour la porte Z : 
-
-On rajoute V_{z} à V_{x}
+On applique X et Y
 
 Mesure d'une observable de Pauli :
 
