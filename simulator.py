@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-Créé le Mer 4 Déc 2024 à 14:40:00
+Created on Wed Dec  4 14:54:34 2024
 
 @author: lenovo
 """
-from quantumcircuit import QuantumCircuit
+from concurrent.futures import ProcessPoolExecutor
 from observables import PauliObservable
-import json
+
 
 class GKSimulator:
     def __init__(self):
         pass
 
-    def charger_circuits(self, fichier_json):
-        with open(fichier_json, 'r') as fichier:
-            circuits = json.load(fichier)
-        return circuits
+    def run(self, quantum_circuit):
+        
+        results = []
+        with ProcessPoolExecutor() as executor:
+            futures = [executor.submit(self._simulate_circuit, circuit) for circuit in quantum_circuit.circuits]
+            for future in futures:
+                results.append(future.result())
+        return results
 
-    def exécuter_circuit(self, données_circuit):
-        circuit = QuantumCircuit(données_circuit)
-      
-        return {"résultat": "Simulation effectuée"}
-
-    def simuler(self):
-        données_circuits = self.charger_circuits('chemin/vers/dummy_circuits.json')
-        résultats = []
-        for données in données_circuits:
-            résultats.append(self.exécuter_circuit(données))
-        return résultats
+    def _simulate_circuit(self, circuit):
+     
+        for gate_dict in circuit["gates"]:
+            for gate, targets in gate_dict.items():
+                for target in targets:
+                    circuit["quantum_circuit"].apply_gate(circuit, gate, target)
+        observable = PauliObservable(circuit["observable"])
+        return observable.measure(circuit["stabilizer_table"])
