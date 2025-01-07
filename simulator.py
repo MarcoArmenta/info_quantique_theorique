@@ -105,4 +105,4 @@ class GKSimulator:
         with Pool(processes=2) as pool: # ici remplacer cpu_count() par le nombre de coeur souhaité
             resultats = pool.map(self.simuler_circuit, circuits_data)
 
-            print(resultats)
+            retun(resultats)
