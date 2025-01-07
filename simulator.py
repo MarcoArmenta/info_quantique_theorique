@@ -30,7 +30,7 @@ class GKSimulator:
         #print(f"Commutateurs calculés : {commutateurs}")
         return commutateurs
 
-
+### Je ne suis pas certain concernant cette partie.  
     def mesurer_observable(self, circuit, observable): # Analyse du commutateur
         commutateurs = self.verifier_commutateurs(circuit, observable)
 
