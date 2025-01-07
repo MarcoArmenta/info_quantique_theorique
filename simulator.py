@@ -59,12 +59,12 @@ class GKSimulator:
         probabilités["+"] = probabilités["+"] / normalisation
         probabilités["-"] = probabilités["-"] / normalisation
 
-        if probabilités["+"] == 0:
+        if probabilités["-"] == 1:
             return {"-": probabilités["-"]}  # retourne la probabilité de "-"
-        elif probabilités["-"] == 0:
+        elif probabilités["-"] == 1:
             return {"+": probabilités["+"]}  # retourne la probabilité de "+"
 
-        return {"+": probabilités["+"], "-": probabilités["-"]}
+        return probabilités
 
     def simuler_circuit(self, circuit_data):
         n_qubits = circuit_data[0] # Nombre de qubits extrait du fichier json
